@@ -1,7 +1,9 @@
 opam-version: "2.0"
-authors: "My Dinh"
+version: "0.0.1"
+authors: "My Dinh <mdinh@hawk.iit.edu>"
 description: ""
 homepage: "https://github.com/b72u68/cs-iit-scraper"
+
 depends: [
 "ocaml" {>= "4.12.1"}
 "cohttp" {>= "4.0.0"}
@@ -11,7 +13,8 @@ depends: [
 "lambdasoup" {>= "0.7.2"}
 "ocamlfind" {>= "1.9.1"}
 ]
+
 build: [
-["ocamlbuild" "-use-ocamlfind" "scraper.native"]
-["make" "build"]
+["ocamlbuild" "-I" "src" "-use-ocamlfind" "scraper.native"]
+[make]
 ]
