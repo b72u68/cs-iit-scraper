@@ -15,6 +15,6 @@ depends: [
 ]
 
 build: [
-["ocamlbuild" "-I" "src" "-use-ocamlfind" "scraper.native"]
+["ocamlbuild" "-I" "src" "-use-ocamlfind" "cs-iit-scraper.native"]
 [make]
 ]
