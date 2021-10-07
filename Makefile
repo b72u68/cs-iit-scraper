@@ -3,7 +3,6 @@ PROJECT_NAME := scraper
 
 all: $(SRC_DIR)/$(PROJECT_NAME).ml
 	ocamlbuild -I src -use-ocamlfind $(PROJECT_NAME).native
-	./scraper.native
 
 build: $(SRC_DIR)/$(PROJECT_NAME).ml
 	ocamlbuild -I src -use-ocamlfind $(PROJECT_NAME).native

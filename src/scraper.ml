@@ -3,6 +3,24 @@ open Cohttp
 open Cohttp_lwt_unix
 open Soup
 
+(* type declaration *)
+type credit_hours = {
+    lecture: string;
+    lab: string;
+    credits: string;
+};;
+
+type course =
+    {
+        code: string;
+        title: string;
+        description: string;
+        preresequites: string;
+        hours: credit_hours;
+        satisfies: string list;
+    }
+;;
+
 (* base urls *)
 let cs_ugrad_url = "http://bulletin.iit.edu/undergraduate/courses/cs/"
 let cs_grad_url = "http://bulletin.iit.edu/graduate/courses/cs/"
@@ -18,27 +36,47 @@ let get_body (uri_string: string): string Lwt.t =
 let ugrad_body: string = Lwt_main.run (get_body cs_ugrad_url);;
 let grad_body: string = Lwt_main.run (get_body cs_grad_url);;
 
-(* parse course description *)
-let parse_courseblockdesc soup : string =
-    let coursedesc_list = texts (soup $ ".courseblockdesc") in
-    let rec concat_desc (l: string list) : string =
-        match l with
-        | [] -> ""
-        | h::t -> h ^ (concat_desc t)
-    in
-    concat_desc coursedesc_list
+
+(* concate a string list together *)
+let rec concat_string (l: string list) : string =
+    match l with
+    | [] -> ""
+    | h::t -> h ^ " " ^ (concat_string t)
 ;;
 
-(* parse course preresiquite(s) *)
-let parse_courseblockattr soup : string = ""
+(* parse course information using the given classname *)
+let parse_course_info soup classname =
+    let courseinfo_list = trimmed_texts (soup $ classname) in
+    concat_string courseinfo_list
+;;
+
+(* parse course code *)
+let parse_coursecode soup = parse_course_info soup ".coursecode";;
+
+(* parse course title *)
+let parse_coursetitle soup = parse_course_info soup ".coursetitle";;
+
+(* parse course description *)
+let parse_courseblockdesc soup = parse_course_info soup ".courseblockdesc";;
+
+(* parse course preresequite(s) *)
+let parse_preresequite soup_course =
+    let preresequite_block = soup_course $ ".courseblockattr" in
+    let soup_preresequite = parse (to_string preresequite_block) in
+    let strong_node = soup_preresequite $ "strong" in
+    let strong_content = R.leaf_text strong_node in
+    if compare "Prerequisite(s):" (String.trim strong_content) = 0 then
+        let preresequite_content_with_strong = concat_string (texts preresequite_block) in
+        let start_sub = String.length "Prerequisite(s):  " in
+        let sub_length = String.length preresequite_content_with_strong - start_sub in
+        String.trim (String.sub preresequite_content_with_strong start_sub sub_length)
+    else ""
 ;;
 
 (* parse for each course in HTML body *)
 let () =
     parse ugrad_body $$ ".courseblock" |> iter (fun a ->
-        let soup_a = parse (to_string a) in
-        let coursecode = R.leaf_text (soup_a $ ".coursecode") in
-        let coursetitle = R.leaf_text (soup_a $ ".coursetitle") in
-        let coursedesc = parse_courseblockdesc soup_a in
-        print_endline (coursecode ^ "\n" ^ coursetitle ^ "\n" ^ coursedesc))
+        let soup_course = parse (to_string a) in
+        let preresequite = parse_preresequite soup_course in
+        print_endline (preresequite))
 ;;
