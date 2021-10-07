@@ -1,5 +1,7 @@
 opam-version: "2.0"
+name: "Cs_iit_scraper"
 version: "0.0.1"
+
 authors: "My Dinh <mdinh@hawk.iit.edu>"
 description: ""
 homepage: "https://github.com/b72u68/cs-iit-scraper"
